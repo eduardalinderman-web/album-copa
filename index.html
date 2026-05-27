@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nosso Álbum da Copa - Du & Nick</title>
+    <title>Nosso Álbum da Copa - Duda e Nicho</title>
     <style>
         :root {
             --bg-color: #f4f6f9;
@@ -256,14 +256,21 @@
             btn.id = `btn-${idUnique.replace(/[^a-zA-Z0-9]/g, '_')}`;
 
             // Evento de clique para guardar diretamente no Realtime Database
-            btn.addEventListener('click', () => {
+           btn.addEventListener('click', () => {
+                const senhaAtual = localStorage.getItem('album_senha') || "";
+                
+                // Validação local da senha antes de enviar para o banco
+                if (senhaAtual !== '111225') {
+                    alert("Acesso Negado! Verifique a sua senha no topo da página.");
+                    return;
+                }
+
                 const isChecked = btn.classList.contains('checked');
                 btn.classList.toggle('checked');
                 
-                // Grava a alteração (true ou null para apagar se desmarcar)
                 dbRef.child(idUnique).set(!isChecked ? true : null).catch(err => {
-                    console.error("Erro ao guardar: ", err);
-                    btn.classList.toggle('checked'); // Desfaz se falhar
+                    console.error("Erro na sincronização: ", err);
+                    btn.classList.toggle('checked'); // Desfaz se houver erro de rede
                 });
             });
 
