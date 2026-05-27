@@ -141,10 +141,9 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const dbRef = db.ref("progresso");
-    // Estrutura atualizada com todas as 49 seleções para as bandeiras oficiais
+    // Estrutura corrigida com todas as 48 seleções e suas bandeiras oficiais
     const countryCodes = {
         "ALG (Argélia)": "dz",
-        "ANG (Inglaterra)": "gb-eng",
         "ARG (Argentina)": "ar",
         "ARS (Arábia Saudita)": "sa",
         "AUS (Austrália)": "au",
@@ -195,7 +194,7 @@
         "UZB (Uzbequistão)": "uz"
     };
 
-    // Suas figurinhas iniciais (as novas seleções começam zeradas para vocês marcarem no site)
+    // Suas figurinhas iniciais
     const initialOwned = {
         "FWC (Especiais / Logos)": [1, 2, 3, 10, 12, 13, 14, 15, 16, 17, 18],
         "MEX (México)": [1, 2, 6, 7, 9, 10, 13, 16, 17, 18, 19, 20],
