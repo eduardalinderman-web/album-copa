@@ -313,16 +313,38 @@
         const allButtons = document.querySelectorAll('.sticker');
         allButtons.forEach(btn => btn.classList.remove('checked'));
 
+        // Dicionário de tradução para garantir que nomes antigos batam com os novos grupos
+        const deParapaises = {
+            "Chéquia": "República Tcheca",
+            "Países Baixos": "Holanda",
+            "Catar": "Qatar",
+            "Bósnia e Herzegovina": "Bósnia",
+            "Inglaterra": "Inglaterra", // Garante correspondência direta
+            "Cabo Verde": "Cabo Verde"
+        };
+
         Object.keys(currentState).forEach(idBanco => {
             if (currentState[idBanco] === true) {
-                // Tenta marcar pelo ID novo com grupo
+                // 1. Tenta o match direto com o ID novo (com grupo)
                 let btn = document.getElementById(`btn-${idBanco.replace(/[^a-zA-Z0-9]/g, '_')}`);
                 
-                // Se não encontrar, procura o país correspondente para aplicar o ID antigo
+                // 2. Se não encontrar, faz a varredura inteligente do nome antigo
                 if (!btn) {
                     Object.keys(countryCodes).forEach(country => {
-                        const nomeAntigo = country.includes(' - ') ? country.split(' - ')[1] : country;
-                        if (idBanco.startsWith(nomeAntigo)) {
+                        // Pega o nome limpo atual (ex: "México")
+                        let nomeAtualLimpo = country.includes(' - ') ? country.split(' - ')[1] : country;
+                        // Remove parênteses e siglas se houver para comparar apenas o texto limpo
+                        nomeAtualLimpo = nomeAtualLimpo.replace(/\s*\([^)]*\)/g, "").trim();
+
+                        // Pega o nome do banco antigo (ex: "CZE (Chéquia)-1" -> "Chéquia")
+                        let nomeBancoLimpo = idBanco.split('-')[0].replace(/\s*\([^)]*\)/g, "").trim();
+
+                        // Aplica a tradução de sinónimos se existir
+                        if (deParapaises[nomeBancoLimpo]) {
+                            nomeBancoLimpo = deParapaises[nomeBancoLimpo];
+                        }
+
+                        if (nomeAtualLimpo === nomeBancoLimpo) {
                             const numSticker = idBanco.split('-').pop();
                             const safeId = `btn-${`${country}-${numSticker}`.replace(/[^a-zA-Z0-9]/g, '_')}`;
                             const fallbackBtn = document.getElementById(safeId);
