@@ -242,8 +242,30 @@
             btn.className = 'sticker';
             btn.innerText = num;
             
-            const idUnique = `${country}-${num}`;
-            btn.id = `btn-${idUnique.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            // Remove o prefixo do grupo (ex: "A1 - ") para checar o nome antigo se o novo não existir
+            const nomeAntigo = country.includes(' - ') ? country.split(' - ')[1] : country;
+            const idNovo = `${country}-${num}`;
+            const idAntigo = `${nomeAntigo}-${num}`;
+            
+            // Define o ID visual do botão
+            btn.id = `btn-${idNovo.replace(/[^a-zA-Z0-9]/g, '_')}`;
+
+            btn.addEventListener('click', () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('editar') !== 'sim') {
+                    alert("Acesso Negado! Este link é apenas para visualização.");
+                    return;
+                }
+
+                const isChecked = btn.classList.contains('checked');
+                btn.classList.toggle('checked');
+                
+                // Grava sempre no formato novo (com o grupo)
+                dbRef.child(idNovo).set(!isChecked ? true : null).catch(err => {
+                    console.error("Erro na sincronização: ", err);
+                    btn.classList.toggle('checked');
+                });
+            });
 
             // Evento de clique para guardar diretamente no Realtime Database
            btn.addEventListener('click', () => {
@@ -287,15 +309,29 @@
     });
 
     // Atualiza visualmente os botões verdes com os dados vindos da nuvem
-    function applyStateToUI() {
+   function applyStateToUI() {
         const allButtons = document.querySelectorAll('.sticker');
         allButtons.forEach(btn => btn.classList.remove('checked'));
 
-        Object.keys(currentState).forEach(idUnique => {
-            if (currentState[idUnique] === true) {
-                const safeId = `btn-${idUnique.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                const btn = document.getElementById(safeId);
-                if (btn) btn.classList.add('checked');
+        Object.keys(currentState).forEach(idBanco => {
+            if (currentState[idBanco] === true) {
+                // Tenta marcar pelo ID novo com grupo
+                let btn = document.getElementById(`btn-${idBanco.replace(/[^a-zA-Z0-9]/g, '_')}`);
+                
+                // Se não encontrar, procura o país correspondente para aplicar o ID antigo
+                if (!btn) {
+                    Object.keys(countryCodes).forEach(country => {
+                        const nomeAntigo = country.includes(' - ') ? country.split(' - ')[1] : country;
+                        if (idBanco.startsWith(nomeAntigo)) {
+                            const numSticker = idBanco.split('-').pop();
+                            const safeId = `btn-${`${country}-${numSticker}`.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                            const fallbackBtn = document.getElementById(safeId);
+                            if (fallbackBtn) fallbackBtn.classList.add('checked');
+                        }
+                    });
+                } else {
+                    btn.classList.add('checked');
+                }
             }
         });
 
