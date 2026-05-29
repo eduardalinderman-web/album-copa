@@ -108,6 +108,11 @@
             color: white;
             border-color: var(--accent-color);
         }
+        /* Estilos para o modo minimizado e pesquisa */
+        .country-header { cursor: pointer; user-select: none; }
+        .country-header:hover { opacity: 0.8; }
+        .stickers-grid.hidden { display: none !important; }
+        .country-card.filtered-out { display: none !important; }
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -123,7 +128,12 @@
         </div>
         <span id="stats-text">Conectando ao banco de dados...</span>
     </header>
-
+    
+<!-- Barra de Pesquisa Moderna -->
+    <div style="max-width: 800px; margin: 0 auto 20px auto; padding: 0 10px;">
+        <input type="text" id="search-input" placeholder="🔍 Pesquisar país ou sigla..." style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-color); font-size: 16px; box-sizing: border-box; box-shadow: 0 2px 8px rgba(0,0,0,0.05); outline: none; transition: border-color 0.2s;">
+    </div>
+    
     <div id="album-list"></div>
 </div>
 
@@ -292,6 +302,14 @@ for (let num = 1; num <= limiteTotal; num++) {
             grid.appendChild(btn);
         }
 
+        // Faz a grade de figurinhas começar minimizada (escondida)
+        grid.classList.add('hidden');
+
+        // Adiciona o evento de clique no cabeçalho do país para abrir/fechar
+        header.addEventListener('click', () => {
+            grid.classList.toggle('hidden');
+        });
+
         card.appendChild(grid);
         container.appendChild(card);
     });
@@ -309,6 +327,23 @@ for (let num = 1; num <= limiteTotal; num++) {
             });
         });
         dbRef.set(startData);
+    });
+
+    // Lógica do Filtro de Pesquisa em Tempo Real
+    document.getElementById('search-input').addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        const countryCards = document.querySelectorAll('.country-card');
+
+        countryCards.forEach(card => {
+            const countryName = card.querySelector('.country-name').innerText.toLowerCase();
+            
+            // Se o termo pesquisado estiver no nome do país, mostra; senão, esconde
+            if (countryName.includes(searchTerm)) {
+                card.classList.remove('filtered-out');
+            } else {
+                card.classList.add('filtered-out');
+            }
+        });
     });
 
     // Atualiza visualmente os botões verdes com os dados vindos da nuvem
